@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro"  >
+    
+    <!-- 要用的東西 **如果有add新的file近來, 就要重新colcon simulink一次-->
+    <xacro:include filename="inertial_macros.xacro"/><!-- inertia公式們 -->
+    <!-- 主機體 -->
+    <!-- color set -->
+    <material name="white">
+        <color rgba="1 1 1 1" />
+    </material>
+
+    <material name="orange">
+        <color rgba="1 0.3 0.1 1" />
+    </material>
+
+    <material name="black">
+        <color rgba="0 0 0 1" />
+    </material>
+
+    <material name="blue">
+        <color rgba="0.5 0.5 1 1" />
+    </material>
+
+    <!-- <material name="collision">
+        <color rgba="1.0 0.0 0.0 0" />
+    </material> -->
+    <!-- 
+    [[Note]] 
+    [set collision]
+    set collision（加在link上!)就是簡單的copy paste visual但把visual改成collision, 變成和它大小同的boundary
+    然後把material項刪掉因為不需要 
+    [set inertia] 利用那個已經有的包就好
+    <xacro:include filename="inertial_macros.xacro"/>
+
+    -->
+
+
+    <!-- set baselink(1st link for mobile robot) -->
+    <link name="base_link">
+
+    </link>
+    
+    <!-- box link -->
+    <joint name="chassis_joint" type="fixed">   
+        <parent link="base_link"/>
+        <child link="chassis"/>
+        <origin xyz="-0.1 0 0"/> <!-- car_box link"的origin" 和base link的相對位置-->
+    </joint>
+
+    
+    <link name="chassis">
+        <visual><!-- is a visable thing, 裡面會定義這個visible thing 的屬性（是個box, 顏色...）-->
+            <origin xyz="0.15 0 0.075"/> 
+            <!--
+            就是這是在設定visual物體的origin, visual_origin就是物體box中心, 現在想要這個物體的中心,相對於its link_joint往前多少（joint就是用joint定義出有座標系軸軸的那個東西)
+            -->
+            <!-- Default link 會長在 its joint_origine 為center的周圍, 但我們想要origine在車車box的後方下面, 所以要把box往前0.15, 往上0.075(對origine）)-->
+            <geometry><!-- 建立一個geometry-->
+                <box size="0.3 0.3 0.15"/> <!-- 是一個box -->
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <collision>
+            <origin xyz="0.15 0 0.075"/>
+            <geometry>
+                <box size="0.3 0.3 0.15"/>
+            </geometry>
+            <!-- <material name="collision"/> -->
+        </collision>
+        <xacro:inertial_box mass="0.5" x="0.3" y="0.3" z="0.15"> <!-- 用那個包,要輸入這個link物體的mass, box體積 -->
+            <origin xyz="0.15 0 0.075" rpy="0 0 0" /> <!-- inertia的origin要和visual geometry此物的origin位置同(像是相對於link origin相對位置多少這樣) -->
+        </xacro:inertial_box>
+    </link>      
+    
+
+    <!-- Left wheel link -->
+    <joint name="left_wheel_joint" type="continuous"><!-- 因為車車輪子會contunuously轉 --> 
+        <parent link="base_link"/>
+        <child link="left_wheel"/>
+        <origin xyz="0.0 0.175 0.0" rpy="-${pi/2} 0 0"/><!-- 因為在ros defult 的cylindeer是直統向上的,但輪子我們想讓它以x為軸去轉90度轉向側邊（想要輪子的z指向世界的外邊) -->
+        <axis xyz="0.0 0.0 1.0"/><!--因為joint 是"continuous"所以要定希望以哪個方向（此link的座標係下, 即z現在指向世界得車車外側)為軸旋轉-->
+    </joint>
+
+    <link name="left_wheel">
+        <visual><!-- 內建visual 的object_origin會和link_origin同, 即<origin xyz="0 0 0" rpy="0 0 0" />-->
+            <geometry>
+                <cylinder radius="0.05" length="0.04"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder radius="0.05" length="0.04"/>
+            </geometry>
+            <!-- <material name="collision"/> -->
+        </collision>
+        <xacro:inertial_cylinder mass="0.1" length="0.04" radius="0.05"> <!-- 用那個包,要輸入這個link物體的mass, box體積 -->
+            <origin xyz="0 0 0" rpy="0 0 0" /> <!-- inertia的origin要和visual geometry此物的origin位置同(像是相對於link origin相對位置多少這樣) -->
+        </xacro:inertial_cylinder>
+    </link>
+
+        <!-- Right wheel link -->
+    <joint name="right_wheel_joint" type="continuous"><!-- 因為車車輪子會contunuously轉 --> 
+        <parent link="base_link"/>
+        <child link="right_wheel"/><!--origin xyz: 相對於parrent link的相對座標-->
+        <origin xyz="0.0 -0.175 0.0" rpy="+${pi/2} 0 0"/><!-- 因為在ros defult 的cylindeer是直統向上的,但輪子我們想讓它以x為軸去轉90度轉向側邊（想要輪子的z指向世界的外邊) -->
+        <axis xyz="0.0 0.0 -1.0"/><!--因為joint 是"continuous"所以要定希望以哪個方向（此link的座標係下, 即z現在指向世界得車車外側)為軸旋轉-->
+    </joint>
+
+    <link name="right_wheel">
+        <visual>
+            <geometry>
+                <cylinder radius="0.05" length="0.04"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder radius="0.05" length="0.04"/>
+            </geometry>
+            <!-- <material name="collision"/> -->
+        </collision>
+        <xacro:inertial_cylinder mass="0.1" length="0.04" radius="0.05"> <!-- 用那個包,要輸入這個link物體的mass, box體積 -->
+            <origin xyz="0 0 0" rpy="0 0 0" /> <!-- inertia的origin要和visual geometry此物的origin位置同(像是相對於link origin相對位置多少這樣) -->
+        </xacro:inertial_cylinder>
+    </link>
+
+    <!-- caster wheel link(有點像萬象輪的前輪,利用把它變成frictionless 所以可以不影響轉向來達成) -->
+    <joint name="caster_wheel_joint" type="fixed">
+        <parent link="chassis"/>
+        <child link="caster_wheel"/>
+        <origin xyz="0.24 0.0 0.0"/><!--是以他的parent origin出發的相對位置向量-->
+    </joint>
+
+    <link name="caster_wheel">
+        <visual>
+            <geometry>
+                <sphere radius="0.05"/>
+            </geometry>
+            <material name="black"/>
+        </visual>
+        <collision>
+            <geometry>
+                <sphere radius="0.05"/>
+            </geometry>
+            <!-- <material name="collision"/> -->
+        </collision>
+        <xacro:inertial_sphere mass="0.1" radius="0.05"> <!-- 用那個包,要輸入這個link物體的mass, box體積 -->
+            <origin xyz="0 0 0" rpy="0 0 0" /> <!-- inertia的origin要和visual geometry此物的origin位置同(像是相對於link origin相對位置多少這樣) -->
+        </xacro:inertial_sphere>            
+    </link>
+</robot>
