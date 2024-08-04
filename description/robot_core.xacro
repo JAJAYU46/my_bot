@@ -29,8 +29,12 @@
     [set collision]
     set collision（加在link上!)就是簡單的copy paste visual但把visual改成collision, 變成和它大小同的boundary
     然後把material項刪掉因為不需要 
+
     [set inertia] 利用那個已經有的包就好
     <xacro:include filename="inertial_macros.xacro"/>
+
+    [[Add Gazebo Tag]]輸進去gazebo之後, 會有一些問題, 所以要加上gazebo tag
+    1. 顏色消失 ==> 在每個有visual tag的"link包下面"都加上gazebo tag（把顏色對上gazebo內的顏色)
 
     -->
 
@@ -70,8 +74,13 @@
         <xacro:inertial_box mass="0.5" x="0.3" y="0.3" z="0.15"> <!-- 用那個包,要輸入這個link物體的mass, box體積 -->
             <origin xyz="0.15 0 0.075" rpy="0 0 0" /> <!-- inertia的origin要和visual geometry此物的origin位置同(像是相對於link origin相對位置多少這樣) -->
         </xacro:inertial_box>
-    </link>      
-    
+    </link>   
+
+    <!-- [[Add Gazebo Tag]]1. 顏色消失 ==> 在每個有visual tag的"link包下面"都加上gazebo tag（把顏色對上gazebo內的顏色)-->
+    <gazebo reference="chassis"> 
+        <material>Gazebo/White</material>
+    </gazebo>
+
 
     <!-- Left wheel link -->
     <joint name="left_wheel_joint" type="continuous"><!-- 因為車車輪子會contunuously轉 --> 
@@ -98,8 +107,12 @@
             <origin xyz="0 0 0" rpy="0 0 0" /> <!-- inertia的origin要和visual geometry此物的origin位置同(像是相對於link origin相對位置多少這樣) -->
         </xacro:inertial_cylinder>
     </link>
-
-        <!-- Right wheel link -->
+    <gazebo reference="left_wheel"> 
+        <material>Gazebo/Blue</material>
+    </gazebo>
+    
+    
+    <!-- Right wheel link -->
     <joint name="right_wheel_joint" type="continuous"><!-- 因為車車輪子會contunuously轉 --> 
         <parent link="base_link"/>
         <child link="right_wheel"/><!--origin xyz: 相對於parrent link的相對座標-->
@@ -124,7 +137,9 @@
             <origin xyz="0 0 0" rpy="0 0 0" /> <!-- inertia的origin要和visual geometry此物的origin位置同(像是相對於link origin相對位置多少這樣) -->
         </xacro:inertial_cylinder>
     </link>
-
+    <gazebo reference="right_wheel"> 
+        <material>Gazebo/Blue</material>
+    </gazebo>
     <!-- caster wheel link(有點像萬象輪的前輪,利用把它變成frictionless 所以可以不影響轉向來達成) -->
     <joint name="caster_wheel_joint" type="fixed">
         <parent link="chassis"/>
@@ -149,4 +164,9 @@
             <origin xyz="0 0 0" rpy="0 0 0" /> <!-- inertia的origin要和visual geometry此物的origin位置同(像是相對於link origin相對位置多少這樣) -->
         </xacro:inertial_sphere>            
     </link>
+    <gazebo reference="caster_wheel"> <!-- 這項gazebo特徵是要加給caster_wheel這個"link"的 -->
+        <material>Gazebo/Black</material>
+        <mu1 value="0.001"/><!-- 因為想要這個萬象輪試frictionless所以設一個很小的數字, 也可以是0. 如果沒設成frictionless, 就會一直產生摩擦力導致車體bounce -->
+        <mu2 value="0.001"/><!-- 兩種小小不同的friction coeffition -->
+    </gazebo>
 </robot>
